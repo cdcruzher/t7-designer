@@ -1,0 +1,686 @@
+<!DOCTYPE html>
+<html lang="en" class="scroll-smooth">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>T7 Designer | Carlos David Science Labs</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;800&family=JetBrains+Mono:wght@400;700&display=swap" rel="stylesheet">
+    <!-- Lucide Icons -->
+    <script src="https://unpkg.com/lucide@latest"></script>
+    <style>
+        body { font-family: 'Inter', sans-serif; }
+        .font-mono { font-family: 'JetBrains Mono', monospace; }
+        
+        .glass-card {
+            background: rgba(30, 41, 59, 0.7);
+            backdrop-filter: blur(12px);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            transition: all 0.3s ease;
+        }
+
+        /* Custom Scrollbar */
+        ::-webkit-scrollbar { width: 8px; }
+        ::-webkit-scrollbar-track { background: #0f172a; }
+        ::-webkit-scrollbar-thumb { background: #334155; border-radius: 4px; }
+        ::-webkit-scrollbar-thumb:hover { background: #475569; }
+
+        /* Sequence Highlighting - Dark Mode Optimized */
+        .promoter { 
+            background-color: rgba(234, 179, 8, 0.2); 
+            color: #fde047; /* yellow-300 */
+            border-bottom: 2px solid #ca8a04;
+        }
+        .added-g { 
+            background-color: rgba(239, 68, 68, 0.2); 
+            color: #fca5a5; /* red-300 */
+            border-bottom: 2px solid #dc2626;
+        }
+        .rna-dna { 
+            background-color: rgba(16, 185, 129, 0.2); 
+            color: #6ee7b7; /* emerald-300 */
+            border-bottom: 2px solid #059669;
+        }
+    </style>
+</head>
+<body class="bg-slate-950 text-slate-100 min-h-screen relative overflow-x-hidden selection:bg-emerald-500 selection:text-white">
+
+    <!-- Background Gradients -->
+    <div class="fixed top-0 left-0 w-full h-full overflow-hidden -z-10 pointer-events-none">
+        <div class="absolute top-[-10%] left-[-10%] w-[50%] h-[50%] bg-emerald-900/20 rounded-full blur-[120px]"></div>
+        <div class="absolute bottom-[-10%] right-[-10%] w-[50%] h-[50%] bg-blue-900/20 rounded-full blur-[120px]"></div>
+    </div>
+
+    <div class="max-w-5xl mx-auto px-6 py-10 md:py-16">
+        
+        <!-- Header -->
+        <header class="flex flex-col md:flex-row justify-between items-center mb-12 gap-6">
+            <div class="flex items-center gap-5">
+                <div class="h-16 w-16 rounded-2xl overflow-hidden border-2 border-slate-700 shadow-xl shadow-emerald-900/20">
+                    <img src="logo.jpg" alt="Logo" class="h-full w-full object-cover" onerror="this.src='https://ui-avatars.com/api/?name=CD&background=10b981&color=fff&size=128'">
+                </div>
+                <div>
+                    <h1 class="text-3xl font-extrabold bg-clip-text text-transparent bg-gradient-to-r from-emerald-200 to-cyan-200">
+                        T7 Designer
+                    </h1>
+                    <div class="text-xs text-slate-400 font-mono mt-1">
+                        Based on Python script by C.D. Cruz-Hernandez
+                    </div>
+                </div>
+            </div>
+            
+            <a href="https://www.paypal.com/donate/?business=6EN68NHUTM2KQ&no_recurring=0&item_name=Thanks+for+your+support+Amigo%21&currency_code=USD" target="_blank" class="px-5 py-2.5 bg-slate-800/80 hover:bg-slate-700 border border-slate-700 hover:border-emerald-500/50 rounded-full text-sm font-medium transition-all flex items-center gap-2 group shadow-lg">
+                <i data-lucide="flask-conical" class="w-4 h-4 text-emerald-400 group-hover:rotate-12 transition-transform"></i>
+                Support Research
+            </a>
+        </header>
+
+        <!-- Tool Container -->
+        <div class="glass-card rounded-3xl p-8 mb-12 shadow-2xl">
+            
+            <div class="flex items-start gap-4 mb-8 border-b border-slate-800 pb-6">
+                <div class="p-3 bg-emerald-500/10 rounded-xl">
+                    <i data-lucide="dna" class="w-8 h-8 text-emerald-400"></i>
+                </div>
+                <div>
+                    <h2 class="text-xl font-bold text-slate-100">Template & Primer Generator</h2>
+                    <p class="text-slate-400 text-sm mt-1 max-w-2xl">
+                        Enter your RNA sequence to automatically generate the T7 promoter-fused ssDNA template and optimize PCR primers.
+                    </p>
+                </div>
+            </div>
+
+            <!-- Inputs -->
+            <div class="grid grid-cols-1 lg:grid-cols-12 gap-8">
+                
+                <!-- Left: Sequence -->
+                <div class="lg:col-span-7 space-y-5">
+                    <div>
+                        <label for="rnaSeq" class="block text-sm font-semibold text-slate-300 mb-2 flex items-center justify-between">
+                            <span>Sequence (5'→3')</span>
+                            <span class="text-xs font-normal text-slate-500 px-2 py-1 bg-slate-900 rounded border border-slate-800">Supports RNA (U) or DNA (T)</span>
+                        </label>
+                        <textarea id="rnaSeq" rows="6" class="w-full p-4 bg-slate-900/50 border border-slate-700 rounded-xl text-slate-200 font-mono text-sm focus:ring-2 focus:ring-emerald-500/50 focus:border-emerald-500 transition-all placeholder-slate-600 outline-none" placeholder="Paste sequence here...&#10;Example: GGGAGAG..."></textarea>
+                    </div>
+                    <div>
+                        <label for="label" class="block text-sm font-semibold text-slate-300 mb-2">Label (Optional)</label>
+                        <div class="relative">
+                            <i data-lucide="tag" class="absolute left-3 top-3.5 w-4 h-4 text-slate-500"></i>
+                            <input type="text" id="label" class="w-full pl-10 pr-4 py-3 bg-slate-900/50 border border-slate-700 rounded-xl text-slate-200 text-sm focus:ring-2 focus:ring-emerald-500/50 focus:border-emerald-500 transition-all placeholder-slate-600 outline-none" placeholder="e.g. Aptamer_Variant_A">
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Right: Settings -->
+                <div class="lg:col-span-5 flex flex-col">
+                    <div class="bg-slate-800/30 rounded-2xl p-6 border border-slate-700/50 h-full">
+                        <h3 class="text-sm font-semibold text-emerald-400 uppercase tracking-wider mb-5 flex items-center gap-2">
+                            <i data-lucide="settings-2" class="w-4 h-4"></i> Configuration
+                        </h3>
+                        
+                        <div class="space-y-6">
+                            <div>
+                                <label for="fwdPrimerLength" class="block text-xs font-medium text-slate-400 mb-1.5">Forward Primer Length</label>
+                                <input type="number" id="fwdPrimerLength" value="20" class="w-full p-2.5 bg-slate-900 border border-slate-700 rounded-lg text-slate-200 text-sm focus:border-emerald-500 outline-none">
+                            </div>
+                            
+                            <div>
+                                <label for="revPrimerLength" class="block text-xs font-medium text-slate-400 mb-1.5">Reverse Primer Length</label>
+                                <input type="number" id="revPrimerLength" value="20" class="w-full p-2.5 bg-slate-900 border border-slate-700 rounded-lg text-slate-200 text-sm focus:border-emerald-500 outline-none transition-opacity">
+                            </div>
+
+                            <div class="pt-2">
+                                <label class="flex items-start gap-3 cursor-pointer group">
+                                    <div class="relative flex items-center">
+                                        <input type="checkbox" id="autoAdjustTm" class="peer sr-only">
+                                        <div class="w-5 h-5 bg-slate-900 border border-slate-600 rounded peer-checked:bg-emerald-500 peer-checked:border-emerald-500 transition-all"></div>
+                                        <i data-lucide="check" class="w-3 h-3 text-white absolute left-1 top-1 opacity-0 peer-checked:opacity-100 transition-opacity"></i>
+                                    </div>
+                                    <div class="text-sm text-slate-300 group-hover:text-emerald-300 transition-colors">
+                                        <span class="font-medium">Auto-optimize Tm</span>
+                                        <p class="text-xs text-slate-500 mt-0.5">Adjusts Reverse length to match Forward Tm.</p>
+                                    </div>
+                                </label>
+                            </div>
+                        </div>
+
+                        <div class="mt-auto pt-8">
+                            <button id="designButton" class="w-full py-3.5 px-6 bg-gradient-to-r from-emerald-600 to-teal-600 hover:from-emerald-500 hover:to-teal-500 text-white font-bold rounded-xl shadow-lg shadow-emerald-900/30 transform transition-all active:scale-[0.98] flex items-center justify-center gap-2">
+                                <i data-lucide="cpu" class="w-5 h-5"></i>
+                                Run Analysis
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Error Message -->
+            <div id="errorMessage" class="hidden mt-6 p-4 bg-red-500/10 border border-red-500/50 rounded-xl text-red-200 text-sm flex items-center gap-3">
+                <i data-lucide="alert-circle" class="w-5 h-5 flex-shrink-0"></i>
+                <span id="errorText"></span>
+            </div>
+
+        </div>
+
+        <!-- Results Section -->
+        <div id="results" class="hidden animate-fade-in-up">
+            
+            <div class="flex flex-col sm:flex-row justify-between items-end mb-6 gap-4">
+                <h2 class="text-2xl font-bold text-slate-100 flex items-center gap-3">
+                    <i data-lucide="clipboard-list" class="w-6 h-6 text-emerald-400"></i>
+                    Results
+                </h2>
+                <div class="flex gap-3">
+                    <button id="copyButton" class="px-4 py-2 bg-slate-800 hover:bg-slate-700 border border-slate-700 rounded-lg text-sm font-medium text-slate-300 transition-all flex items-center gap-2">
+                        <i data-lucide="copy" class="w-4 h-4"></i> Copy
+                    </button>
+                    <button id="downloadButton" class="px-4 py-2 bg-slate-800 hover:bg-slate-700 border border-slate-700 rounded-lg text-sm font-medium text-emerald-400 hover:text-emerald-300 transition-all flex items-center gap-2">
+                        <i data-lucide="download" class="w-4 h-4"></i> Report.txt
+                    </button>
+                </div>
+            </div>
+
+            <div class="space-y-6">
+
+                <!-- 1. Metadata -->
+                <div class="glass-card rounded-2xl p-6">
+                    <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                        <div>
+                            <span class="text-xs font-semibold text-slate-500 uppercase tracking-wider block mb-1">Label</span>
+                            <span id="resultLabel" class="text-lg text-slate-100 font-medium"></span>
+                        </div>
+                        <div>
+                            <span class="text-xs font-semibold text-slate-500 uppercase tracking-wider block mb-1">Input Sanitized</span>
+                            <span id="resultRna" class="font-mono text-sm text-slate-400 break-all"></span>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- 2. Duplex Visualization -->
+                <div class="glass-card rounded-2xl p-6 border-l-4 border-l-emerald-500">
+                    <h3 class="text-lg font-bold text-slate-100 mb-4 flex items-center gap-2">
+                        <i data-lucide="align-justify" class="w-5 h-5 text-emerald-400"></i> dsDNA Assembly
+                    </h3>
+                    
+                    <div class="flex gap-4 text-xs mb-4">
+                        <div class="flex items-center gap-2">
+                            <span class="w-3 h-3 bg-yellow-500/20 border-b-2 border-yellow-600"></span>
+                            <span class="text-slate-400">T7 Promoter</span>
+                        </div>
+                        <div class="flex items-center gap-2">
+                            <span class="w-3 h-3 bg-red-500/20 border-b-2 border-red-600"></span>
+                            <span class="text-slate-400">Start G</span>
+                        </div>
+                        <div class="flex items-center gap-2">
+                            <span class="w-3 h-3 bg-emerald-500/20 border-b-2 border-emerald-600"></span>
+                            <span class="text-slate-400">RNA Seq</span>
+                        </div>
+                    </div>
+
+                    <div class="bg-slate-900/80 rounded-xl p-6 border border-slate-800 overflow-x-auto">
+                        <div class="font-mono text-sm whitespace-nowrap leading-8">
+                            <!-- Sense -->
+                            <div class="flex items-center">
+                                <span class="text-slate-500 font-bold w-8 select-none">5'</span>
+                                <div id="resultSenseSequence" class="tracking-wide text-slate-200"></div>
+                                <span class="text-slate-500 font-bold ml-3 select-none">3'</span>
+                            </div>
+                            <!-- Complement -->
+                            <div class="flex items-center mt-1">
+                                <span class="text-slate-500 font-bold w-8 select-none">3'</span>
+                                <div id="resultComplementSequence" class="tracking-wide text-slate-500"></div>
+                                <span class="text-slate-500 font-bold ml-3 select-none">5'</span>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="mt-4 flex items-center gap-2">
+                        <input type="checkbox" id="showAntiSense" class="w-4 h-4 rounded bg-slate-900 border-slate-600 text-emerald-500 focus:ring-emerald-500/20">
+                        <label for="showAntiSense" class="text-sm text-slate-400 select-none cursor-pointer">Show separate Anti-Sense strand (5'→3')</label>
+                    </div>
+                    <div id="resultSeparateAntiSenseStrand" class="hidden mt-3 p-4 bg-slate-900/50 rounded-lg font-mono text-sm text-slate-300 break-all border border-slate-800"></div>
+                </div>
+
+                <!-- 3. Primers Grid -->
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                    <!-- Forward -->
+                    <div class="glass-card rounded-2xl p-6 relative overflow-hidden">
+                        <div class="absolute top-0 right-0 p-3 opacity-10">
+                            <i data-lucide="arrow-right" class="w-16 h-16"></i>
+                        </div>
+                        <h4 class="text-sm font-bold text-slate-400 uppercase tracking-wider mb-3">Forward Primer</h4>
+                        <div id="resultForward" class="font-mono text-sm text-emerald-300 break-all bg-slate-900/50 p-3 rounded-lg border border-slate-700/50 mb-3"></div>
+                        <div class="flex items-center gap-2 text-sm text-slate-300">
+                            <i data-lucide="thermometer" class="w-4 h-4 text-slate-500"></i>
+                            Tm: <span id="resultForwardTm" class="font-bold"></span>°C
+                        </div>
+                    </div>
+
+                    <!-- Reverse -->
+                    <div class="glass-card rounded-2xl p-6 relative overflow-hidden">
+                        <div class="absolute top-0 right-0 p-3 opacity-10">
+                            <i data-lucide="arrow-left" class="w-16 h-16"></i>
+                        </div>
+                        <h4 class="text-sm font-bold text-slate-400 uppercase tracking-wider mb-3">Reverse Primer</h4>
+                        <div id="resultReverse" class="font-mono text-sm text-blue-300 break-all bg-slate-900/50 p-3 rounded-lg border border-slate-700/50 mb-3"></div>
+                        <div class="flex items-center gap-2 text-sm text-slate-300">
+                            <i data-lucide="thermometer" class="w-4 h-4 text-slate-500"></i>
+                            Tm: <span id="resultReverseTm" class="font-bold"></span>°C
+                        </div>
+                    </div>
+                </div>
+
+                <!-- 4. Analysis Report -->
+                <div class="glass-card rounded-2xl p-6">
+                    <h3 class="text-lg font-bold text-slate-100 mb-5 flex items-center gap-2">
+                        <i data-lucide="microscope" class="w-5 h-5 text-emerald-400"></i> Analysis & Quality Check
+                    </h3>
+                    <div class="grid grid-cols-1 lg:grid-cols-2 gap-y-3 gap-x-8 text-sm">
+                        
+                        <div id="analysisTm" class="col-span-full pb-3 border-b border-slate-800 mb-2"></div>
+
+                        <div class="space-y-3">
+                            <span class="text-xs font-semibold text-slate-500 uppercase">Forward Primer</span>
+                            <div id="analysisFwdGc"></div>
+                            <div id="analysisFwdClamp"></div>
+                            <div id="analysisFwdRepeats"></div>
+                        </div>
+
+                        <div class="space-y-3">
+                            <span class="text-xs font-semibold text-slate-500 uppercase">Reverse Primer</span>
+                            <div id="analysisRevGc"></div>
+                            <div id="analysisRevClamp"></div>
+                            <div id="analysisRevRepeats"></div>
+                        </div>
+
+                        <div class="col-span-full pt-4 border-t border-slate-800 mt-2">
+                            <div id="analysisDimers"></div>
+                        </div>
+
+                    </div>
+                </div>
+
+            </div>
+        </div>
+
+        <!-- Footer -->
+        <footer class="mt-24 border-t border-slate-800 pt-8 text-center text-slate-500 text-sm">
+            <p>&copy; 2024 Carlos David Cruz Hernandez. All rights reserved.</p>
+            <div class="mt-4 flex justify-center gap-4">
+                <div class="w-20 h-20 bg-white/10 backdrop-blur-sm border border-white/20 p-1 rounded-lg">
+                    <a href="https://www.paypal.com/donate/?business=6EN68NHUTM2KQ&no_recurring=0&item_name=Thanks+for+your+support+Amigo%21&currency_code=USD" target="_blank">
+                        <img src="qrcode.jpg" class="w-full h-full object-contain rounded-md" alt="Donate" onerror="this.src='https://api.qrserver.com/v1/create-qr-code/?size=100x100&data=https%3A%2F%2Fwww.paypal.com%2Fdonate%2F%3Fbusiness%3D6EN68NHUTM2KQ%26no_recurring%3D0%26item_name%3DThanks%2Bfor%2Byour%2Bsupport%2BAmigo%21%26currency_code%3DUSD'">
+                    </a>
+                </div>
+            </div>
+        </footer>
+
+    </div>
+
+    <!-- Logic Script -->
+    <script>
+        // Initialize Icons
+        lucide.createIcons();
+
+        document.addEventListener('DOMContentLoaded', () => {
+            const rnaSeqEl = document.getElementById('rnaSeq');
+            const labelEl = document.getElementById('label');
+            const fwdPrimerLengthEl = document.getElementById('fwdPrimerLength');
+            const revPrimerLengthEl = document.getElementById('revPrimerLength');
+            const designButton = document.getElementById('designButton');
+            const copyButton = document.getElementById('copyButton');
+            const downloadButton = document.getElementById('downloadButton');
+            const resultsEl = document.getElementById('results');
+            const errorMessageEl = document.getElementById('errorMessage');
+            const errorTextEl = document.getElementById('errorText');
+            const showAntiSenseEl = document.getElementById('showAntiSense');
+            const autoAdjustTmEl = document.getElementById('autoAdjustTm');
+ 
+            // Results Refs
+            const resultLabel = document.getElementById('resultLabel');
+            const resultRna = document.getElementById('resultRna');
+            const resultSenseSequence = document.getElementById('resultSenseSequence');
+            const resultComplementSequence = document.getElementById('resultComplementSequence');
+            const resultSeparateAntiSenseStrand = document.getElementById('resultSeparateAntiSenseStrand');
+            const resultForward = document.getElementById('resultForward');
+            const resultForwardTm = document.getElementById('resultForwardTm');
+            const resultReverse = document.getElementById('resultReverse');
+            const resultReverseTm = document.getElementById('resultReverseTm');
+            
+            // Analysis Refs
+            const analysisTm = document.getElementById('analysisTm');
+            const analysisFwdGc = document.getElementById('analysisFwdGc');
+            const analysisRevGc = document.getElementById('analysisRevGc');
+            const analysisFwdClamp = document.getElementById('analysisFwdClamp');
+            const analysisRevClamp = document.getElementById('analysisRevClamp');
+            const analysisFwdRepeats = document.getElementById('analysisFwdRepeats');
+            const analysisRevRepeats = document.getElementById('analysisRevRepeats');
+            const analysisDimers = document.getElementById('analysisDimers');
+
+            let reportData = {};
+
+            // --- Logic Functions ---
+
+            function rnaToDna(rnaSeq) {
+                return rnaSeq.toUpperCase().replace(/U/g, 'T');
+            }
+
+            function designSsDnaTemplate(rnaSeq) {
+                const rnaUpper = rnaSeq.toUpperCase();
+                const promoterCore = "TAATACGACTCACTATA";
+                let addedG = "";
+                
+                if (!rnaUpper.startsWith('G')) addedG = "G";
+                
+                const rnaDnaPart = rnaToDna(rnaUpper);
+                const fullTemplate = promoterCore + addedG + rnaDnaPart;
+                
+                return {
+                    fullTemplate: fullTemplate,
+                    promoterPart: promoterCore,
+                    addedG: addedG,
+                    rnaDnaPart: rnaDnaPart
+                };
+            }
+
+            function reverseComplement(seq) {
+                const complementMap = {'A':'T', 'T':'A', 'G':'C', 'C':'G', 'N': 'N'};
+                let rc = "";
+                for (let i = seq.length - 1; i >= 0; i--) {
+                    const base = seq[i].toUpperCase();
+                    rc += complementMap[base] || base;
+                }
+                return rc;
+            }
+
+            function complement(seq) {
+                const complementMap = {'A':'T', 'T':'A', 'G':'C', 'C':'G', 'N': 'N'};
+                let comp = "";
+                for (let i = 0; i < seq.length; i++) {
+                    const base = seq[i].toUpperCase();
+                    comp += complementMap[base] || base;
+                }
+                return comp;
+            }
+
+            function designPrimers(ssdnaTemplate, fwdLength, revLength) {
+                const forward = ssdnaTemplate.substring(0, fwdLength);
+                const reverse = reverseComplement(ssdnaTemplate.substring(ssdnaTemplate.length - revLength));
+                return { forward, reverse };
+            }
+
+            function calculateTm(seq) {
+                seq = seq.toUpperCase();
+                const n = seq.length;
+                if (n === 0) return 0;
+                
+                const gcCount = (seq.match(/[GC]/g) || []).length;
+                const percentGC = (gcCount / n) * 100;
+                
+                if (n < 14) {
+                    const atCount = (seq.match(/[AT]/g) || []).length;
+                    return (atCount * 2) + (gcCount * 4);
+                }
+                
+                const tm = 81.5 + (0.41 * percentGC) - (675 / n);
+                return Math.round(tm);
+            }
+
+            function autoAdjustTm(ssdnaTemplate, fwdTm, initialRevLength) {
+                const maxAttempts = 15;
+                const tmThreshold = 5;
+                let bestLength = initialRevLength;
+                let bestTmDiff = Infinity;
+
+                for (let i = 0; i < maxAttempts; i++) {
+                    let currentLength = (i % 2 === 0) 
+                        ? initialRevLength + Math.ceil(i / 2) 
+                        : initialRevLength - Math.ceil(i / 2);
+                    
+                    if (currentLength < 15) continue; 
+                    
+                    const revSeq = reverseComplement(ssdnaTemplate.substring(ssdnaTemplate.length - currentLength));
+                    const revTm = calculateTm(revSeq);
+                    const tmDiff = Math.abs(fwdTm - revTm);
+                    
+                    if (tmDiff <= tmThreshold) return currentLength;
+                    
+                    if (tmDiff < bestTmDiff) {
+                        bestTmDiff = tmDiff;
+                        bestLength = currentLength;
+                    }
+                }
+                return bestLength;
+            }
+
+            // --- Analysis UI Helpers ---
+
+            function analysisItem(isBad, goodMessage, badMessage) {
+                if (isBad) {
+                    return `<div class="analysis-item flex items-start gap-2 text-orange-400">
+                        <i data-lucide="alert-triangle" class="w-4 h-4 mt-0.5 flex-shrink-0"></i>
+                        <span>${badMessage}</span>
+                    </div>`;
+                } else {
+                    return `<div class="analysis-item flex items-start gap-2 text-emerald-400">
+                        <i data-lucide="check-circle-2" class="w-4 h-4 mt-0.5 flex-shrink-0"></i>
+                        <span>${goodMessage}</span>
+                    </div>`;
+                }
+            }
+
+            function checkGC(seq) {
+                const gcCount = (seq.match(/[GC]/g) || []).length;
+                const percentGC = Math.round((gcCount / seq.length) * 100);
+                const isBad = percentGC < 40 || percentGC > 60;
+                const html = analysisItem(isBad, `GC: ${percentGC}%`, `GC: ${percentGC}% (Ideal 40-60%)`);
+                return { percentGC, html };
+            }
+
+            function checkGCClamp(seq) {
+                const lastBase = seq.slice(-1).toUpperCase();
+                const hasClamp = lastBase === 'G' || lastBase === 'C';
+                const html = analysisItem(!hasClamp, `3' Clamp: Yes (${lastBase})`, `3' Clamp: No (${lastBase})`);
+                return { hasClamp, html };
+            }
+
+            function checkRepeats(seq) {
+                const hasRepeat = /(A{4,}|T{4,}|G{4,}|C{4,})/.test(seq.toUpperCase());
+                const html = analysisItem(hasRepeat, "No Repeats >3", "Warning: Long Repeat (>3)");
+                return { hasRepeat, html };
+            }
+
+            function checkDimers(fwd, rev) {
+                const fwdEnd = fwd.slice(-5);
+                const revEnd = rev.slice(-5);
+                const fwdRc = reverseComplement(fwdEnd);
+                const revRc = reverseComplement(revEnd);
+
+                let warnings = [];
+                
+                // Hetero
+                let heteroScore = 0;
+                const revEndComp = complement(revEnd).split("").reverse().join("");
+                for(let i=0; i<fwdEnd.length; i++) if(fwdEnd[i]===revEndComp[i]) heteroScore++;
+                if (heteroScore >= 4) warnings.push("Hetero-Dimer");
+
+                // Self
+                let fwdSelfScore = 0;
+                const fwdEndComp = complement(fwdEnd).split("").reverse().join("");
+                for(let i=0; i<fwdEnd.length; i++) if(fwdEnd[i]===fwdEndComp[i]) fwdSelfScore++;
+                if (fwdSelfScore >= 4) warnings.push("Fwd Self-Dimer");
+
+                let revSelfScore = 0;
+                const revEndCompSelf = complement(revEnd).split("").reverse().join("");
+                for(let i=0; i<revEnd.length; i++) if(revEnd[i]===revEndCompSelf[i]) revSelfScore++;
+                if (revSelfScore >= 4) warnings.push("Rev Self-Dimer");
+
+                if (warnings.length > 0) {
+                    return analysisItem(true, "", `Dimer Risk: ${warnings.join(', ')}`);
+                } else {
+                    return analysisItem(false, "Dimer Risk: Low", "");
+                }
+            }
+
+            // --- Main Run ---
+
+            function runDesign() {
+                try {
+                    // Input processing
+                    const rawInput = rnaSeqEl.value.toUpperCase();
+                    const rnaSeq = rawInput.replace(/T/g, 'U').replace(/[^ACGU]/g, '');
+                    
+                    if (!rnaSeq) throw new Error("Please enter a valid RNA/DNA sequence.");
+                    
+                    const label = labelEl.value.trim();
+                    const fwdLength = parseInt(fwdPrimerLengthEl.value);
+                    let revLength = parseInt(revPrimerLengthEl.value);
+
+                    if (isNaN(fwdLength) || isNaN(revLength) || fwdLength < 10 || revLength < 10) {
+                        throw new Error("Primer lengths must be at least 10.");
+                    }
+                    
+                    errorMessageEl.classList.add('hidden');
+                    resultsEl.classList.remove('hidden');
+
+                    // Design
+                    const template = designSsDnaTemplate(rnaSeq);
+                    
+                    // Optimizations
+                    const fwdPrimerSeq = template.fullTemplate.substring(0, fwdLength);
+                    const fwdTm = calculateTm(fwdPrimerSeq);
+
+                    if (autoAdjustTmEl.checked) {
+                        const optimizedLength = autoAdjustTm(template.fullTemplate, fwdTm, revLength);
+                        revLength = optimizedLength;
+                        revPrimerLengthEl.value = optimizedLength;
+                    }
+
+                    const primers = designPrimers(template.fullTemplate, fwdLength, revLength);
+                    const revTm = calculateTm(primers.reverse);
+                    
+                    const complementStrand = complement(template.fullTemplate);
+                    const antiSenseStrand = reverseComplement(template.fullTemplate);
+
+                    // Analysis
+                    const fwdGc = checkGC(primers.forward);
+                    const revGc = checkGC(primers.reverse);
+                    const fwdClamp = checkGCClamp(primers.forward);
+                    const revClamp = checkGCClamp(primers.reverse);
+                    const fwdRep = checkRepeats(primers.forward);
+                    const revRep = checkRepeats(primers.reverse);
+                    const dimer = checkDimers(primers.forward, primers.reverse);
+                    
+                    const tmDiff = Math.abs(fwdTm - revTm);
+                    const tmHtml = analysisItem(tmDiff > 5, `Tm Match: Δ ${tmDiff}°C`, `Tm Mismatch: Δ ${tmDiff}°C (Ideal < 5)`);
+
+                    // Render
+                    resultLabel.textContent = label || 'Untitled';
+                    resultRna.textContent = rnaSeq;
+                    
+                    resultSenseSequence.innerHTML = `<span class="promoter">${template.promoterPart}</span><span class="added-g">${template.addedG}</span><span class="rna-dna">${template.rnaDnaPart}</span>`;
+                    resultComplementSequence.textContent = complementStrand;
+                    resultSeparateAntiSenseStrand.textContent = antiSenseStrand;
+
+                    resultForward.textContent = primers.forward;
+                    resultForwardTm.textContent = fwdTm;
+                    resultReverse.textContent = primers.reverse;
+                    resultReverseTm.textContent = revTm;
+                    
+                    // Render Analysis
+                    analysisTm.innerHTML = tmHtml;
+                    analysisFwdGc.innerHTML = fwdGc.html;
+                    analysisRevGc.innerHTML = revGc.html;
+                    analysisFwdClamp.innerHTML = fwdClamp.html;
+                    analysisRevClamp.innerHTML = revClamp.html;
+                    analysisFwdRepeats.innerHTML = fwdRep.html;
+                    analysisRevRepeats.innerHTML = revRep.html;
+                    analysisDimers.innerHTML = dimer;
+
+                    // Re-scan icons
+                    lucide.createIcons();
+
+                    // Store Data
+                    reportData = {
+                        label: label || 'Untitled',
+                        inputRna: rnaSeq,
+                        senseStrand: template.fullTemplate,
+                        complementStrand: complementStrand,
+                        antiSenseStrand: antiSenseStrand,
+                        fwdPrimer: primers.forward,
+                        fwdTm,
+                        revPrimer: primers.reverse,
+                        revTm
+                    };
+
+                } catch (error) {
+                    errorMessageEl.classList.remove('hidden');
+                    errorTextEl.textContent = error.message;
+                    resultsEl.classList.add('hidden');
+                }
+            }
+
+            function generateReport() {
+                if (!reportData.senseStrand) return;
+                
+                let report = `T7 DESIGNER REPORT\n`;
+                report += `------------------\n`;
+                report += `Date: ${new Date().toLocaleString()}\n`;
+                report += `Label: ${reportData.label}\n\n`;
+                report += `INPUT:\n${reportData.inputRna}\n\n`;
+                report += `dsDNA DUPLEX:\n`;
+                report += `Sense (5'-3'):      ${reportData.senseStrand}\n`;
+                report += `Complement (3'-5'): ${reportData.complementStrand}\n\n`;
+                if (showAntiSenseEl.checked) {
+                    report += `Anti-Sense (5'-3'): ${reportData.antiSenseStrand}\n\n`;
+                }
+                report += `PRIMERS:\n`;
+                report += `Forward (Tm ${reportData.fwdTm}): ${reportData.fwdPrimer}\n`;
+                report += `Reverse (Tm ${reportData.revTm}): ${reportData.revPrimer}\n`;
+                
+                return report;
+            }
+
+            // Events
+            designButton.addEventListener('click', runDesign);
+
+            showAntiSenseEl.addEventListener('change', () => {
+                resultSeparateAntiSenseStrand.classList.toggle('hidden', !showAntiSenseEl.checked);
+            });
+
+            autoAdjustTmEl.addEventListener('change', () => {
+                revPrimerLengthEl.disabled = autoAdjustTmEl.checked;
+                if(autoAdjustTmEl.checked) revPrimerLengthEl.classList.add('opacity-50');
+                else revPrimerLengthEl.classList.remove('opacity-50');
+            });
+
+            copyButton.addEventListener('click', () => {
+                const text = generateReport();
+                if(text) {
+                    navigator.clipboard.writeText(text);
+                    const originalHTML = copyButton.innerHTML;
+                    copyButton.innerHTML = `<i data-lucide="check" class="w-4 h-4"></i> Copied`;
+                    lucide.createIcons();
+                    setTimeout(() => {
+                        copyButton.innerHTML = originalHTML;
+                        lucide.createIcons();
+                    }, 2000);
+                }
+            });
+
+            downloadButton.addEventListener('click', () => {
+                const text = generateReport();
+                if(!text) return;
+                const blob = new Blob([text], { type: 'text/plain' });
+                const url = URL.createObjectURL(blob);
+                const a = document.createElement('a');
+                a.href = url;
+                a.download = `T7_Design_${reportData.label.replace(/\s/g,'_')}.txt`;
+                document.body.appendChild(a);
+                a.click();
+                document.body.removeChild(a);
+            });
+        });
+    </script>
+</body>
+</html>
